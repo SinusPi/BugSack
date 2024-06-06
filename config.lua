@@ -6,6 +6,7 @@ local L = addon.L
 local frame = addon.frame
 frame.name = addonName
 frame:Hide()
+local ldbi = LibStub("LibDBIcon-1.0")
 
 frame:SetScript("OnShow", function(frame)
 	local function newCheckbox(label, description, onClick)
@@ -50,13 +51,28 @@ frame:SetScript("OnShow", function(frame)
 		function(self, value)
 			BugSackLDBIconDB.hide = not value
 			if BugSackLDBIconDB.hide then
-				LibStub("LibDBIcon-1.0"):Hide(addonName)
+				ldbi:Hide(addonName)
 			else
-				LibStub("LibDBIcon-1.0"):Show(addonName)
+				ldbi:Show(addonName)
 			end
 		end)
 	minimap:SetPoint("TOPLEFT", chatFrame, "BOTTOMLEFT", 0, -8)
 	minimap:SetChecked(not BugSackLDBIconDB.hide)
+
+	if ldbi:IsButtonCompartmentAvailable() then
+		local addonCompartment = newCheckbox(
+			L.addonCompartment,
+			L.addonCompartment_desc,
+			function(self, value)
+				if value then
+					ldbi:AddButtonToCompartment("BugSack")
+				else
+					ldbi:RemoveButtonFromCompartment("BugSack")
+				end
+			end)
+		addonCompartment:SetPoint("LEFT", minimap, "RIGHT", 150, 0)
+		addonCompartment:SetChecked(ldbi:IsButtonInCompartment("BugSack"))
+	end
 
 	local mute = newCheckbox(
 		L["Mute"],
@@ -121,14 +137,14 @@ frame:SetScript("OnShow", function(frame)
 			UIDropDownMenu_AddButton(info)
 		end
 	end
-	BugSackSoundDropdownText:SetText(L["Sound"])
+	soundDropdown.Text:SetText(L["Sound"])
 
 	local master = newCheckbox(
 		L.useMaster,
 		L.useMasterDesc,
 		function(self, value) addon.db.useMaster = value end)
 		master:SetChecked(addon.db.useMaster)
-		master:SetPoint("LEFT", dropdown, "RIGHT", 140, 0)
+		master:SetPoint("LEFT", soundDropdown, "RIGHT", 140, 0)
 
 	local clear = CreateFrame("Button", "BugSackSaveButton", frame, "UIPanelButtonTemplate")
 	clear:SetText(L["Wipe saved bugs"])
